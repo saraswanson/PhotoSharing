@@ -2,10 +2,10 @@ package com.cs646.photosharing;
 
 import android.support.v4.app.Fragment;
 
-public class UserListActivity extends SingleFragmentActivity {
+public class PhotoListActivity extends SingleFragmentActivity {
 
 	@Override
     public Fragment createFragment() {
-        return new UserListFragment();
+        return new PhotoListFragment();
     }
 }

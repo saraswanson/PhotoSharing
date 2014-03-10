@@ -1,4 +1,4 @@
-package com.bignerdranch.android.photogallery;
+package com.cs646.photosharing;
 
 import android.os.Bundle;
 

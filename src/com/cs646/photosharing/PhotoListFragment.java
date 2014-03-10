@@ -18,9 +18,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 
-public class UserListFragment extends ListFragment {
+public class PhotoListFragment extends ListFragment {
 	private static final String TAG = "PhotoSharing";
 	HttpClient mHttpclient;
 	String[] mUserList;
@@ -35,9 +36,6 @@ public class UserListFragment extends ListFragment {
 
 		// Retain the fragment across the activity's re-creation
 		setRetainInstance(true);
-
-		// Start the task to download the user list
-// TODO		new FetchUserListTask().execute(url);		do this in onResume
 	}
 
 	@Override
@@ -60,7 +58,7 @@ public class UserListFragment extends ListFragment {
 		mActivityCode = USER_PHOTO_CODE;
 		
 		// Create an Intent to call the List Activity
-		Intent i = new Intent(this, PhotoListActivity.class);
+		Intent i = new Intent(this, PhotoActivity.class);
 
 		// Pass data to the ListActivity
 		i.putExtra(USER_ID, id);
@@ -77,7 +75,7 @@ public class UserListFragment extends ListFragment {
 		String userAgent = null;
 		mHttpclient = AndroidHttpClient.newInstance(userAgent);
 		FetchUserListTask task = new FetchUserListTask();
-		String url = "http://bismarck.sdsu.edu/photoserver/userlist/";
+		String url = "http://bismarck.sdsu.edu/photoserver/userphotos/";
 		task.execute(url);
 	}
 
@@ -109,7 +107,14 @@ public class UserListFragment extends ListFragment {
 		protected String doInBackground(String... urls) {
 			// String url = "http://bismarck.sdsu.edu/photoserver/userlist/";
 			// HttpClient httpclient = AndroidHttpClient.newInstance(null);
-			HttpGet getMethod = new HttpGet(urls[0]);
+			// Get the text sent from the Main Activity
+			mMainStr = getActivity().getIntent().getStringExtra(MainActivity.MAIN_TEXT);
+			
+			// Set the text sent from the Main Activity
+			mTextFromMain = (EditText)findViewById(R.id.textFromMain);
+			mTextFromMain.setText(mMainStr);
+			
+			HttpGet getMethod = new HttpGet(urls[0] + user_id);
 			try {
 				ResponseHandler<String> responseHandler = new BasicResponseHandler();
 				String responseBody = mHttpclient.execute(getMethod,
