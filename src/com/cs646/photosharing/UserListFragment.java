@@ -24,10 +24,8 @@ public class UserListFragment extends ListFragment {
 	private static final String TAG = "PhotoSharing";
 	HttpClient mHttpclient;
 	String[] mUserList;
-	int[] mIdList;
+	long[] mIdList;
 	public static final String USER_ID = "com.cs646.android.UISampler.user_id";
-	public static final int USER_PHOTO_CODE = 0;
-	private int mActivityCode;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -44,7 +42,7 @@ public class UserListFragment extends ListFragment {
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Log.i("", "in onListItemClick: position = " + position +  "  user = " + mUserList[position] + "  id = " + mIdList[position]);		
 		
-		startUserPhotoActivity(mIdList[position]);
+		startPhotoListActivity(mIdList[position]);
 		// new Toast(getActivity(), numbers_digits[(int) id]);
 
 		// Start new activity to show the list of photos
@@ -55,14 +53,13 @@ public class UserListFragment extends ListFragment {
 	/*
 	 * Start the UserPhotoActivity
 	 */
-	protected void startUserPhotoActivity(int id) {
-		Log.i(TAG, "startListActivity id = " + id);
-		mActivityCode = USER_PHOTO_CODE;
+	protected void startPhotoListActivity(long id) {
+		Log.i(TAG, "startPhotoListActivity id = " + id);
 		
 		// Create an Intent to call the List Activity
-		Intent i = new Intent(this, PhotoListActivity.class);
+		Intent i = new Intent(getActivity(), PhotoListActivity.class);
 
-		// Pass data to the ListActivity
+		// Pass data to the PhotoListActivity
 		i.putExtra(USER_ID, id);
 
 // TODO		startActivityForResult(i, mActivityCode);
@@ -83,6 +80,7 @@ public class UserListFragment extends ListFragment {
 
 	@Override
 	public void onPause() {
+    	super.onPause();
 		mHttpclient.getConnectionManager().shutdown();
 	}
 
@@ -123,18 +121,24 @@ public class UserListFragment extends ListFragment {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+		 * Executed when AsyncTask completes
+		 * Executes on the Main UI thread so UI updates go here
+		 */
 		public void onPostExecute(String result) {
-			Log.i(TAG, result); // here you could put contents into UI
-									// element
+			Log.i(TAG, result); 
 
 			// Get the JSON data from the response
 			try {
 				JSONArray userList = new JSONArray(result);				
 				mUserList = new String[userList.length()];
+				mIdList = new long[userList.length()];
 				for (int i=0; i<userList.length(); i++) {
 					JSONObject user = (JSONObject) userList.get(i);
 					mUserList[i] = user.getString("name");
-					mIdList[i] = user.getInt("id");
+					mIdList[i] = user.getLong("id");
 				}
 				// TODO int id = user.getInt("id");		save the id somewhere
 				

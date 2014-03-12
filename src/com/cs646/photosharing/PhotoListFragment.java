@@ -18,31 +18,43 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 
 public class PhotoListFragment extends ListFragment {
 	private static final String TAG = "PhotoSharing";
 	HttpClient mHttpclient;
-	String[] mUserList;
+	String[] mPhotoList;
 	int[] mIdList;
-	public static final String USER_ID = "com.cs646.android.UISampler.user_id";
+	long mUserId;
+	public static final String EXTRA_USER_ID = "com.cs646.android.UISampler.user_id";
 	public static final int USER_PHOTO_CODE = 0;
 	private int mActivityCode;
 
+    public static PhotoListFragment newInstance(long userId) {
+        Bundle args = new Bundle();
+        args.putLong(EXTRA_USER_ID, userId);
+
+        PhotoListFragment fragment = new PhotoListFragment();
+        fragment.setArguments(args);
+
+        return fragment;
+    }
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+        mUserId = (long)getArguments().getLong(EXTRA_USER_ID);
+        
 		// Retain the fragment across the activity's re-creation
 		setRetainInstance(true);
 	}
 
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		Log.i("", "in onListItemClick: position = " + position +  "  user = " + mUserList[position] + "  id = " + mIdList[position]);		
+		Log.i("", "in onListItemClick: position = " + position +  "  photo = " + mPhotoList[position] + "  id = " + mIdList[position]);		
 		
-		startUserPhotoActivity(mIdList[position]);
+		startPhotoActivity(mIdList[position]);
 		// new Toast(getActivity(), numbers_digits[(int) id]);
 
 		// Start new activity to show the list of photos
@@ -53,15 +65,15 @@ public class PhotoListFragment extends ListFragment {
 	/*
 	 * Start the UserPhotoActivity
 	 */
-	protected void startUserPhotoActivity(int id) {
-		Log.i(TAG, "startListActivity id = " + id);
-		mActivityCode = USER_PHOTO_CODE;
+	protected void startPhotoActivity(int id) {
+		Log.i(TAG, "startPhotoActivity id = " + id);
+//		mActivityCode = USER_PHOTO_CODE;
 		
 		// Create an Intent to call the List Activity
-		Intent i = new Intent(this, PhotoActivity.class);
+		Intent i = new Intent(getActivity(), PhotoActivity.class);
 
 		// Pass data to the ListActivity
-		i.putExtra(USER_ID, id);
+//		i.putExtra(EXTRA_PHOTO_ID, id);
 
 // TODO		startActivityForResult(i, mActivityCode);
 		startActivity(i);
@@ -74,13 +86,14 @@ public class PhotoListFragment extends ListFragment {
 		super.onResume();
 		String userAgent = null;
 		mHttpclient = AndroidHttpClient.newInstance(userAgent);
-		FetchUserListTask task = new FetchUserListTask();
-		String url = "http://bismarck.sdsu.edu/photoserver/userphotos/";
+		FetchPhotoListTask task = new FetchPhotoListTask();
+		String url = "http://bismarck.sdsu.edu/photoserver/userphotos/" + mUserId;
 		task.execute(url);
 	}
 
 	@Override
 	public void onPause() {
+    	super.onPause();
 		mHttpclient.getConnectionManager().shutdown();
 	}
 
@@ -103,18 +116,9 @@ public class PhotoListFragment extends ListFragment {
 	 *  2 Y 	progress Y passed as args to onProgressUpdate
 	 *  3 Z 	results Z passed as args to onPostExecute
 	 */
-	class FetchUserListTask extends AsyncTask<String, Void, String> {
+	class FetchPhotoListTask extends AsyncTask<String, Void, String> {
 		protected String doInBackground(String... urls) {
-			// String url = "http://bismarck.sdsu.edu/photoserver/userlist/";
-			// HttpClient httpclient = AndroidHttpClient.newInstance(null);
-			// Get the text sent from the Main Activity
-			mMainStr = getActivity().getIntent().getStringExtra(MainActivity.MAIN_TEXT);
-			
-			// Set the text sent from the Main Activity
-			mTextFromMain = (EditText)findViewById(R.id.textFromMain);
-			mTextFromMain.setText(mMainStr);
-			
-			HttpGet getMethod = new HttpGet(urls[0] + user_id);
+			HttpGet getMethod = new HttpGet(urls[0]);
 			try {
 				ResponseHandler<String> responseHandler = new BasicResponseHandler();
 				String responseBody = mHttpclient.execute(getMethod,
@@ -122,38 +126,41 @@ public class PhotoListFragment extends ListFragment {
 				Log.i(TAG, responseBody);
 				return responseBody;
 			} catch (Throwable t) {
-				Log.i(TAG, "UserList request failed", t);
+				Log.i(TAG, "PhotoList request failed", t);
 			}
 
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+		 * Executed when AsyncTask completes
+		 * Executes on the Main UI thread so UI updates go here
+		 */
 		public void onPostExecute(String result) {
-			Log.i(TAG, result); // here you could put contents into UI
-									// element
+			Log.i(TAG, result); 
 
 			// Get the JSON data from the response
 			try {
-				JSONArray userList = new JSONArray(result);				
-				mUserList = new String[userList.length()];
-				for (int i=0; i<userList.length(); i++) {
-					JSONObject user = (JSONObject) userList.get(i);
-					mUserList[i] = user.getString("name");
-					mIdList[i] = user.getInt("id");
+				JSONArray photoList = new JSONArray(result);				
+				mPhotoList = new String[photoList.length()];
+				mIdList = new int[photoList.length()];
+				for (int i=0; i<photoList.length(); i++) {
+					JSONObject photo = (JSONObject) photoList.get(i);
+					mPhotoList[i] = photo.getString("name");
+					mIdList[i] = photo.getInt("id");
 				}
-				// TODO int id = user.getInt("id");		save the id somewhere
 				
 				// Add the list of users to the UI list
 				ArrayAdapter<String> adapter = new ArrayAdapter<String>(
 						getActivity(), android.R.layout.simple_list_item_1,
-						mUserList);
+						mPhotoList);
 				setListAdapter(adapter);
 			} catch (JSONException e) {
 				e.printStackTrace();
 				Log.e(TAG, "Error getting JSON response", e);
 			}
-
-
 		}
 	}
 

@@ -24,6 +24,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".PhotoListActivity"
+            android:label="@string/app_name"
+            android:parentActivityName="com.cs646.uisampler.UserListActivity" />
+        <activity
+            android:name=".PhotoActivity"
+            android:label="@string/app_name"
+            android:parentActivityName="com.cs646.uisampler.PhotoListActivity" />
     </application>
 
 </manifest>
