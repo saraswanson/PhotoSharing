@@ -25,7 +25,7 @@ public class UserListFragment extends ListFragment {
 	HttpClient mHttpclient;
 	String[] mUserList;
 	long[] mIdList;
-	public static final String USER_ID = "com.cs646.android.UISampler.user_id";
+	public static final String EXTRA_USER_ID = "com.cs646.android.UISampler.user_id";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -60,7 +60,7 @@ public class UserListFragment extends ListFragment {
 		Intent i = new Intent(getActivity(), PhotoListActivity.class);
 
 		// Pass data to the PhotoListActivity
-		i.putExtra(USER_ID, id);
+		i.putExtra(UserListFragment.EXTRA_USER_ID, id);
 
 // TODO		startActivityForResult(i, mActivityCode);
 		startActivity(i);

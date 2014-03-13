@@ -1,15 +1,15 @@
 package com.cs646.photosharing;
 
-import java.util.UUID;
-
 import android.support.v4.app.Fragment;
 
 public class PhotoListActivity extends SingleFragmentActivity {
 
 	@Override
 	public Fragment createFragment() {
+		// Get the user id from the intent and pass it
+		// to the Fragment using Fragment Arguments
 		long userId = (long) getIntent().getLongExtra(
-				PhotoListFragment.EXTRA_USER_ID, -1);
+				UserListFragment.EXTRA_USER_ID, -1);
 		return PhotoListFragment.newInstance(userId);
 	}
 }

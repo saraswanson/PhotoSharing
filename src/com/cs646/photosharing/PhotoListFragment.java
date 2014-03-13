@@ -26,13 +26,17 @@ public class PhotoListFragment extends ListFragment {
 	String[] mPhotoList;
 	int[] mIdList;
 	long mUserId;
-	public static final String EXTRA_USER_ID = "com.cs646.android.UISampler.user_id";
+	public static final String EXTRA_PHOTO_ID = "com.cs646.android.UISampler.photo_id";
 	public static final int USER_PHOTO_CODE = 0;
 	private int mActivityCode;
 
+	/*
+	 * Create and instance of the Fragment
+	 * pass the userId to the Fragment using Fragment Arguments
+	 */
     public static PhotoListFragment newInstance(long userId) {
         Bundle args = new Bundle();
-        args.putLong(EXTRA_USER_ID, userId);
+        args.putLong(UserListFragment.EXTRA_USER_ID, userId);
 
         PhotoListFragment fragment = new PhotoListFragment();
         fragment.setArguments(args);
@@ -40,16 +44,27 @@ public class PhotoListFragment extends ListFragment {
         return fragment;
     }
 	
+    /*
+     * (non-Javadoc)
+     * @see android.support.v4.app.Fragment#onCreate(android.os.Bundle)
+     * Called when the Fragment is created
+     * Get the mUserId passed from the calling activity by using Fragment Arguments
+     */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-        mUserId = (long)getArguments().getLong(EXTRA_USER_ID);
+        mUserId = (long)getArguments().getLong(UserListFragment.EXTRA_USER_ID);
         
 		// Retain the fragment across the activity's re-creation
 		setRetainInstance(true);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see android.support.v4.app.ListFragment#onListItemClick(android.widget.ListView, android.view.View, int, long)
+	 * Called when a list item is clicked
+	 */
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Log.i("", "in onListItemClick: position = " + position +  "  photo = " + mPhotoList[position] + "  id = " + mIdList[position]);		
@@ -71,9 +86,9 @@ public class PhotoListFragment extends ListFragment {
 		
 		// Create an Intent to call the List Activity
 		Intent i = new Intent(getActivity(), PhotoActivity.class);
-
-		// Pass data to the ListActivity
-//		i.putExtra(EXTRA_PHOTO_ID, id);
+		
+		// Pass data to the PhotoListActivity
+		i.putExtra(PhotoListFragment.EXTRA_PHOTO_ID, id);
 
 // TODO		startActivityForResult(i, mActivityCode);
 		startActivity(i);
