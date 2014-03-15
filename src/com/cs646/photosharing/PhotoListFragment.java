@@ -27,6 +27,7 @@ public class PhotoListFragment extends ListFragment {
 	int[] mIdList;
 	long mUserId;
 	public static final String EXTRA_PHOTO_ID = "com.cs646.android.UISampler.photo_id";
+	public static final String EXTRA_PHOTO_ID_LIST = "com.cs646.android.UISampler.photo_id_list";
 	public static final int USER_PHOTO_CODE = 0;
 	private int mActivityCode;
 
@@ -85,10 +86,11 @@ public class PhotoListFragment extends ListFragment {
 //		mActivityCode = USER_PHOTO_CODE;
 		
 		// Create an Intent to call the List Activity
-		Intent i = new Intent(getActivity(), PhotoActivity.class);
+		Intent i = new Intent(getActivity(), PhotoPagerActivity.class);
 		
 		// Pass data to the PhotoListActivity
 		i.putExtra(PhotoListFragment.EXTRA_PHOTO_ID, id);
+		i.putExtra(PhotoListFragment.EXTRA_PHOTO_ID_LIST, mIdList);
 
 // TODO		startActivityForResult(i, mActivityCode);
 		startActivity(i);
