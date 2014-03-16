@@ -14,9 +14,10 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
+        android:name=".PhotoSharingApplication" 
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.cs646.photosharing.UserListActivity"
+            android:name=".UserListActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,15 +28,15 @@
         <activity
             android:name=".PhotoListActivity"
             android:label="@string/app_name"
-            android:parentActivityName="com.cs646.uisampler.UserListActivity" />
+            android:parentActivityName=".UserListActivity" />
         <activity
             android:name=".PhotoActivity"
             android:label="@string/app_name"
-            android:parentActivityName="com.cs646.uisampler.PhotoListActivity" />
+            android:parentActivityName=".PhotoListActivity" />
         <activity
             android:name=".PhotoPagerActivity"
             android:label="@string/app_name"
-            android:parentActivityName="com.cs646.uisampler.PhotoListActivity" />
+            android:parentActivityName=".PhotoListActivity" />
     </application>
 
 </manifest>

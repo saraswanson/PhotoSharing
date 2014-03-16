@@ -1,5 +1,9 @@
 package com.cs646.photosharing;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.http.HttpEntity;
@@ -9,7 +13,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.http.AndroidHttpClient;
@@ -23,18 +29,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 public class PhotoFragment extends Fragment {
-	private static final String TAG = "PhotoSharing";
-	HttpClient mHttpclient;
-	long mPhotoId;
+	HttpClient mHttpclient = null;
+	int mPhotoId;
 	ImageView mPhotoView;
 
 	/*
 	 * Create and instance of the Fragment pass the userId to the Fragment using
 	 * Fragment Arguments
 	 */
-	public static PhotoFragment newInstance(long photoId) {
+	public static PhotoFragment newInstance(int photoId) {
 		Bundle args = new Bundle();
-		args.putLong(PhotoListFragment.EXTRA_PHOTO_ID, photoId);
+		args.putInt(PhotoListFragment.EXTRA_PHOTO_ID, photoId);
 
 		PhotoFragment fragment = new PhotoFragment();
 		fragment.setArguments(args);
@@ -53,8 +58,8 @@ public class PhotoFragment extends Fragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mPhotoId = (long) getArguments().getLong(
-				PhotoListFragment.EXTRA_PHOTO_ID);
+		mPhotoId = (int) getArguments()
+				.getInt(PhotoListFragment.EXTRA_PHOTO_ID);
 
 		// Retain the fragment across the activity's re-creation
 		setRetainInstance(true);
@@ -69,11 +74,29 @@ public class PhotoFragment extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		String userAgent = null;
-		mHttpclient = AndroidHttpClient.newInstance(userAgent);
-		FetchPhotoTask task = new FetchPhotoTask();
-		String url = "http://bismarck.sdsu.edu/photoserver/photo/" + mPhotoId;
-		task.execute(url);
+
+		// String filename = Integer.toString(mPhotoId);
+		File filesDir = getActivity().getApplicationContext().getFilesDir();
+		File photoFile = new File(filesDir, Integer.toString(mPhotoId));
+		// Bitmap photo = BitmapFactory.decodeFile(filename);
+		Bitmap photo = null;
+		try {
+			photo = BitmapFactory.decodeStream(new FileInputStream(photoFile));
+			// result is the image/jpeg
+			mPhotoView.setImageBitmap(photo);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		if (photo == null) {
+			String userAgent = null;
+			mHttpclient = AndroidHttpClient.newInstance(userAgent);
+			FetchPhotoTask task = new FetchPhotoTask();
+			String url = "http://bismarck.sdsu.edu/photoserver/photo/"
+					+ mPhotoId;
+			task.execute(url);
+		}
 	}
 
 	/*
@@ -85,7 +108,9 @@ public class PhotoFragment extends Fragment {
 	@Override
 	public void onPause() {
 		super.onPause();
-		mHttpclient.getConnectionManager().shutdown();
+		if (mHttpclient != null) {
+			mHttpclient.getConnectionManager().shutdown();
+		}
 	}
 
 	/*
@@ -100,8 +125,8 @@ public class PhotoFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.photo_fragment, container, false);
-		mPhotoView = (ImageView)v.findViewById(R.id.photo2View);
-				
+		mPhotoView = (ImageView) v.findViewById(R.id.photo2View);
+
 		return v;
 	}
 
@@ -120,14 +145,18 @@ public class PhotoFragment extends Fragment {
 			// BasicResponseHandler();
 			// String responseBody = mHttpclient.execute(getMethod,
 			// responseHandler);
-			// Log.i(TAG, responseBody);
+			// Log.i(UserListActivity.TAG, responseBody);
 			// return responseBody;
 			// } catch (Throwable t) {
-			// Log.i(TAG, "Photo request failed", t);
+			// Log.i(UserListActivity.TAG, "Photo request failed", t);
 			// }
 
 			try {
 				Bitmap downloadBitmap = downloadBitmap(urls[0]);
+
+				// Save the photo to the filesystem cache
+				savePhotoToFile(downloadBitmap);
+
 				// Updates the user interface
 				return downloadBitmap;
 			} catch (IOException e) {
@@ -143,12 +172,12 @@ public class PhotoFragment extends Fragment {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpResponse response = httpClient.execute(request);
 
+			// Get the bitmap response from the Http call
 			StatusLine statusLine = response.getStatusLine();
 			int statusCode = statusLine.getStatusCode();
 			if (statusCode == 200) {
 				HttpEntity entity = response.getEntity();
 				byte[] bytes = EntityUtils.toByteArray(entity);
-
 				Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0,
 						bytes.length);
 				return bitmap;
@@ -156,6 +185,48 @@ public class PhotoFragment extends Fragment {
 				throw new IOException("Download failed, HTTP response code "
 						+ statusCode + " - " + statusLine.getReasonPhrase());
 			}
+		}
+
+		private void savePhotoToFile(Bitmap photo) {
+			String filename = Integer.toString(mPhotoId);
+			// file = new File(myDir, fname);
+			// Log.i(TAG, "" + file);
+			// if (file.exists())
+			// file.delete();
+			try {
+				FileOutputStream out = getActivity().getApplicationContext()
+						.openFileOutput(filename, Context.MODE_PRIVATE);
+				// FileOutputStream out = new FileOutputStream(filename);
+				photo.compress(Bitmap.CompressFormat.JPEG, 90, out);
+				out.flush();
+				out.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		public Bitmap loadPhotoFromFile(int photoId) throws IOException,
+				JSONException {
+			Bitmap photo;
+			String filename = Integer.toString(photoId);
+			// BufferedReader reader = null;
+
+			photo = BitmapFactory.decodeFile(filename);
+			// try {
+			// // open and read the file into a StringBuilder
+			// InputStream in = getActivity().getApplicationContext()
+			// .openFileInput(filename);
+			// reader = new BufferedReader(new InputStreamReader(in));
+			// StringBuilder jsonString = new StringBuilder();
+			//
+			// }
+			// } catch (FileNotFoundException e) {
+			// // we will ignore this one, since it happens when we start fresh
+			// } finally {
+			// if (reader != null)
+			// reader.close();
+			// }
+			return photo;
 		}
 
 		/*
@@ -166,11 +237,11 @@ public class PhotoFragment extends Fragment {
 		 * go here
 		 */
 		public void onPostExecute(Bitmap result) {
-			Log.i(TAG, "In PhotoFragment:onPostExecute");
+			Log.i(UserListActivity.TAG, "In PhotoFragment:onPostExecute");
 
 			// result is the image/jpeg
 			mPhotoView.setImageBitmap(result);
-			
+
 			// close the connection
 			mHttpclient.getConnectionManager().shutdown();
 		}

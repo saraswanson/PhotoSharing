@@ -1,25 +1,34 @@
 package com.cs646.photosharing;
 
 public class User {
-	private String mName;
-	private int mId;
+	private int mUserId;
+	private String mUserName;
 	
 	public User (String n, int i) {
-		this.mName = n;
-		this.mId = i;
+		super();
+		this.mUserName = n;
+		this.mUserId = i;
 	}
 	
-	public String getName() {
-		return mName;
+	public User() {
 	}
-	public void setName(String name) {
-		mName = name;
+
+	public String getUserName() {
+		return mUserName;
 	}
-	public int getId() {
-		return mId;
+	public void setUserName(String name) {
+		mUserName = name;
 	}
-	public void setId(int id) {
-		mId = id;
+	public int getUserId() {
+		return mUserId;
+	}
+	public void setUserId(int id) {
+		mUserId = id;
 	}
 	
+    @Override
+    public String toString() {
+        return "Photo [userId=" + mUserId + ", userName=" + mUserName
+                + "]";
+    }
 }
