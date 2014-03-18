@@ -13,7 +13,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -78,14 +77,12 @@ public class PhotoFragment extends Fragment {
 		// String filename = Integer.toString(mPhotoId);
 		File filesDir = getActivity().getApplicationContext().getFilesDir();
 		File photoFile = new File(filesDir, Integer.toString(mPhotoId));
-		// Bitmap photo = BitmapFactory.decodeFile(filename);
 		Bitmap photo = null;
 		try {
 			photo = BitmapFactory.decodeStream(new FileInputStream(photoFile));
 			// result is the image/jpeg
 			mPhotoView.setImageBitmap(photo);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -110,6 +107,7 @@ public class PhotoFragment extends Fragment {
 		super.onPause();
 		if (mHttpclient != null) {
 			mHttpclient.getConnectionManager().shutdown();
+			mHttpclient = null;
 		}
 	}
 
@@ -139,18 +137,6 @@ public class PhotoFragment extends Fragment {
 	 */
 	class FetchPhotoTask extends AsyncTask<String, Void, Bitmap> {
 		protected Bitmap doInBackground(String... urls) {
-			// HttpGet getMethod = new HttpGet(urls[0]);
-			// try {
-			// ResponseHandler<String> responseHandler = new
-			// BasicResponseHandler();
-			// String responseBody = mHttpclient.execute(getMethod,
-			// responseHandler);
-			// Log.i(UserListActivity.TAG, responseBody);
-			// return responseBody;
-			// } catch (Throwable t) {
-			// Log.i(UserListActivity.TAG, "Photo request failed", t);
-			// }
-
 			try {
 				Bitmap downloadBitmap = downloadBitmap(urls[0]);
 
@@ -169,8 +155,8 @@ public class PhotoFragment extends Fragment {
 		// Utiliy method to download image from the internet
 		private Bitmap downloadBitmap(String url) throws IOException {
 			HttpGet request = new HttpGet(url);
-			HttpClient httpClient = new DefaultHttpClient();
-			HttpResponse response = httpClient.execute(request);
+			//HttpClient httpClient = new DefaultHttpClient();
+			HttpResponse response = mHttpclient.execute(request);
 
 			// Get the bitmap response from the Http call
 			StatusLine statusLine = response.getStatusLine();
@@ -189,44 +175,17 @@ public class PhotoFragment extends Fragment {
 
 		private void savePhotoToFile(Bitmap photo) {
 			String filename = Integer.toString(mPhotoId);
-			// file = new File(myDir, fname);
-			// Log.i(TAG, "" + file);
-			// if (file.exists())
-			// file.delete();
 			try {
+				// Must get a Context which will know the default path
+				// to store files
 				FileOutputStream out = getActivity().getApplicationContext()
 						.openFileOutput(filename, Context.MODE_PRIVATE);
-				// FileOutputStream out = new FileOutputStream(filename);
 				photo.compress(Bitmap.CompressFormat.JPEG, 90, out);
 				out.flush();
 				out.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
-
-		public Bitmap loadPhotoFromFile(int photoId) throws IOException,
-				JSONException {
-			Bitmap photo;
-			String filename = Integer.toString(photoId);
-			// BufferedReader reader = null;
-
-			photo = BitmapFactory.decodeFile(filename);
-			// try {
-			// // open and read the file into a StringBuilder
-			// InputStream in = getActivity().getApplicationContext()
-			// .openFileInput(filename);
-			// reader = new BufferedReader(new InputStreamReader(in));
-			// StringBuilder jsonString = new StringBuilder();
-			//
-			// }
-			// } catch (FileNotFoundException e) {
-			// // we will ignore this one, since it happens when we start fresh
-			// } finally {
-			// if (reader != null)
-			// reader.close();
-			// }
-			return photo;
 		}
 
 		/*

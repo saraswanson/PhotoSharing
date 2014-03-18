@@ -25,7 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class PhotoListFragment extends ListFragment {
-	HttpClient mHttpclient;
+	HttpClient mHttpClient;
 	List<Photo> mPhotoList;
 	int mUserId;
 	public static final String EXTRA_PHOTO_ID = "com.cs646.android.UISampler.photo_id";
@@ -66,6 +66,7 @@ public class PhotoListFragment extends ListFragment {
 		PhotoSharingApplication myApplication = (PhotoSharingApplication) getActivity()
 				.getApplication();
 		mDb = myApplication.getDatabase();
+		mHttpClient = myApplication.getHttpClient();
 
 		// Retain the fragment across the activity's re-creation
 		setRetainInstance(true);
@@ -112,8 +113,8 @@ public class PhotoListFragment extends ListFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		String userAgent = null;
-		mHttpclient = AndroidHttpClient.newInstance(userAgent);
+// TODO		String userAgent = null;
+//		mHttpClient = AndroidHttpClient.newInstance(userAgent);
 		FetchPhotoListTask task = new FetchPhotoListTask();
 		String url = "http://bismarck.sdsu.edu/photoserver/userphotos/"
 				+ mUserId;
@@ -123,7 +124,7 @@ public class PhotoListFragment extends ListFragment {
 	@Override
 	public void onPause() {
 		super.onPause();
-		mHttpclient.getConnectionManager().shutdown();
+// TODO		mHttpClient.getConnectionManager().shutdown();
 	}
 
 	@Override
@@ -150,13 +151,12 @@ public class PhotoListFragment extends ListFragment {
 			HttpGet getMethod = new HttpGet(urls[0]);
 			try {
 				ResponseHandler<String> responseHandler = new BasicResponseHandler();
-				String responseBody = mHttpclient.execute(getMethod,
+				String responseBody = mHttpClient.execute(getMethod,
 						responseHandler);
 				Log.i(UserListActivity.TAG, responseBody);
 				return responseBody;
 			} catch (Throwable t) {
 				Log.i(UserListActivity.TAG, "PhotoList request failed", t);
-				// TODO if the connection fails then look up data in the db
 			}
 
 			return null;
@@ -199,7 +199,7 @@ public class PhotoListFragment extends ListFragment {
 							e);
 				}
 			} else {
-				// TODO The request failed so try to get the data out of the
+				// The request failed so try to get the data out of the
 				// database
 				mPhotoList = mDb.getAllPhotos();
 				for (Iterator<Photo> photoIter = mPhotoList.iterator(); photoIter

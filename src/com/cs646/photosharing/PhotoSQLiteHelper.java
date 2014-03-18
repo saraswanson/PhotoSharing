@@ -24,7 +24,7 @@ public class PhotoSQLiteHelper extends SQLiteOpenHelper {
 														
 	private static final String KEY_PHOTOID = "photoid"; // photolist column
 	private static final String KEY_PHOTONAME = "photoname"; // photolist column name
-	private static final String[] PHOTOLIST_COLUMNS = { KEY_PHOTOID, KEY_PHOTONAME };
+	//private static final String[] PHOTOLIST_COLUMNS = { KEY_PHOTOID, KEY_PHOTONAME };
 	SQLiteDatabase mDb;
 
 	public PhotoSQLiteHelper(Context context) {
@@ -37,8 +37,6 @@ public class PhotoSQLiteHelper extends SQLiteOpenHelper {
 		// SQL statement to create user table
 		String CREATE_USERS_TABLE = "CREATE TABLE IF NOT EXISTS users ( "
 				+ "userid INTEGER PRIMARY KEY, " + "username TEXT )";
-		
-		// CREATE  TABLE "main"."test_table" ("id" INTEGER PRIMARY KEY  NOT NULL , "name" TEXT)
 
 		// create users table
 		db.execSQL(CREATE_USERS_TABLE);
@@ -73,7 +71,7 @@ public class PhotoSQLiteHelper extends SQLiteOpenHelper {
 		values.put(KEY_USERID, user.getUserId()); // get userid
 		values.put(KEY_USERNAME, user.getUserName()); // get username
 		// 3. insert
-		db.insert(TABLE_USERS, // table
+		db.replace(TABLE_USERS, // table
 				null, // nullColumnHack
 				values); // key/value -> keys = column names/ values = column
 							// values
@@ -93,7 +91,7 @@ public class PhotoSQLiteHelper extends SQLiteOpenHelper {
 		values.put(KEY_PHOTOID, photo.getPhotoId()); // get photoid
 		values.put(KEY_PHOTONAME, photo.getPhotoName()); // get photoname
 		// 3. insert
-		db.insert(TABLE_PHOTOLIST, // table
+		db.replace(TABLE_PHOTOLIST, // table
 				null, // nullColumnHack
 				values); // key/value -> keys = column names/ values = column
 							// values

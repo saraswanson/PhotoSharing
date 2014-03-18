@@ -25,7 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class UserListFragment extends ListFragment {
-	private HttpClient mHttpclient;
+	private HttpClient mHttpClient;
 	private List<User> mUserList;
 	public static final String EXTRA_USER_ID = "com.cs646.android.UISampler.user_id";
 	public static final String EXTRA_DATABASE = "com.cs646.android.UISampler.database";
@@ -35,11 +35,10 @@ public class UserListFragment extends ListFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// Get the SQLite database to store users and photo ids
-		// TODO mDb = new PhotoSQLiteHelper(getActivity());
 		PhotoSharingApplication myApplication = (PhotoSharingApplication) getActivity()
 				.getApplication();
 		mDb = myApplication.getDatabase();
+		mHttpClient = myApplication.getHttpClient();
 
 		// Retain the fragment across the activity's re-creation
 		setRetainInstance(true);
@@ -53,7 +52,6 @@ public class UserListFragment extends ListFragment {
 
 		// Start new activity to show the list of photos
 		startPhotoListActivity(u.getUserId());
-
 	}
 
 	/*
@@ -74,10 +72,10 @@ public class UserListFragment extends ListFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		String userAgent = null;
-
-		// Create the HttpClient
-		mHttpclient = AndroidHttpClient.newInstance(userAgent);
+// TODO		String userAgent = null;
+//
+//		// Create the HttpClient
+//		mHttpClient = AndroidHttpClient.newInstance(userAgent);
 
 		// Create a background task to query the server
 		FetchUserListTask task = new FetchUserListTask();
@@ -88,7 +86,7 @@ public class UserListFragment extends ListFragment {
 	@Override
 	public void onPause() {
 		super.onPause();
-		mHttpclient.getConnectionManager().shutdown();
+// TODO		mHttpClient.getConnectionManager().shutdown();
 	}
 
 	@Override
@@ -117,7 +115,7 @@ public class UserListFragment extends ListFragment {
 			HttpGet getMethod = new HttpGet(urls[0]);
 			try {
 				ResponseHandler<String> responseHandler = new BasicResponseHandler();
-				String responseBody = mHttpclient.execute(getMethod,
+				String responseBody = mHttpClient.execute(getMethod,
 						responseHandler);
 				Log.i(UserListActivity.TAG, responseBody);
 				return responseBody;
@@ -162,7 +160,7 @@ public class UserListFragment extends ListFragment {
 					Log.e(UserListActivity.TAG, "Error getting JSON response", e);
 				}
 			} else {
-				// TODO The request failed so try to get the data out of the
+				// The request failed so try to get the data out of the
 				// database
 				mUserList = mDb.getAllUsers();
 				for (Iterator<User> userIter = mUserList.iterator(); userIter
